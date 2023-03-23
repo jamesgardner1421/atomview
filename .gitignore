@@ -1,3 +1,3 @@
 imgui.ini
-build
+cmake-build*
 *.spv

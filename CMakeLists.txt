@@ -6,13 +6,12 @@ project(
     LANGUAGES CXX
     )
 
-message(STATUS $ENV{VULKAN_SDK})
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
 add_executable(${PROJECT_NAME} src/main.cpp src/Application.cpp src/Window.cpp
     src/Icosphere.cpp src/Renderer.cpp src/AtomicSystem.cpp src/Camera.cpp
-        src/RayCast.cpp src/RayCast.h)
+        )
 
 find_package(Vulkan REQUIRED)
 find_package(glfw3 REQUIRED)
@@ -22,7 +21,6 @@ find_package(imgui REQUIRED)
 add_subdirectory(external/chemfiles)
 
 function(add_shader TARGET SHADER)
-#    find_program(GLSLC glslc REQUIRED)
 
     set(current-shader-path ${CMAKE_CURRENT_SOURCE_DIR}/shaders/${SHADER})
     set(current-output-path ${CMAKE_BINARY_DIR}/shaders/${SHADER}.spv)
@@ -31,7 +29,6 @@ function(add_shader TARGET SHADER)
     get_filename_component(current-output-dir ${current-output-path} DIRECTORY)
     file(MAKE_DIRECTORY ${current-output-dir})
 
-    message(STATUS Vulkan::glslc -o ${current-output-path} ${current-shader-path})
     add_custom_command(
             OUTPUT ${current-output-path}
             COMMAND Vulkan::glslc -o ${current-output-path} ${current-shader-path}
