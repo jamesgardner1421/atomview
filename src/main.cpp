@@ -1,9 +1,12 @@
 #include <iostream>
 #include <stdexcept>
+#include <filesystem>
 
 #include "Application.hpp"
 
 int main(int argc, char *argv[]) {
+    std::cout << "Launching atomview" << std::endl;
+    std::cout << std::filesystem::current_path() << std::endl;
 
     if (argc != 2)
     {
@@ -12,6 +15,7 @@ int main(int argc, char *argv[]) {
     }
 
     std::string filename{argv[1]};
+    std::cout << "Filename:" << filename << std::endl;
 
     Application app{800, 600};
 

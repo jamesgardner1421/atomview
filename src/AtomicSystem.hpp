@@ -16,11 +16,15 @@ public:
     glm::vec3 getCentre() const;
     glm::vec3 getInitialCameraPosition() const;
 
+    const std::vector<int>& getSelectedAtoms() const { return m_SelectedAtoms; }
+    void selectAtoms(const std::vector<int>& selection);
+
 private:
     std::string filename_;
 
     chemfiles::Trajectory trajectory_;
     chemfiles::Frame frame_;
 
+    std::vector<int> m_SelectedAtoms;
 };
 

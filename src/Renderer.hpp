@@ -3,6 +3,7 @@
 #define GLFW_INCLUDE_VULKAN
 #define VK_ENABLE_BETA_EXTENSIONS
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan.hpp>
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -32,9 +33,11 @@ struct QueueFamilyIndices {
 };
 
 struct SwapChainSupportDetails {
-    VkSurfaceCapabilitiesKHR capabilities;
-    std::vector<VkSurfaceFormatKHR> formats;
-    std::vector<VkPresentModeKHR> presentModes;
+    vk::SurfaceCapabilitiesKHR capabilities;
+    std::vector<vk::SurfaceFormatKHR> formats;
+    std::vector<vk::PresentModeKHR> presentModes;
+
+    SwapChainSupportDetails(vk::PhysicalDevice device, VkSurfaceKHR surface);
 };
 
 const uint32_t WIDTH = 1000;
@@ -65,9 +68,10 @@ struct UniformBufferObject {
     alignas(16) glm::mat4 proj;
 };
 
-struct ModelData {
-    alignas(16) glm::mat4 model;
-    alignas(16) glm::vec3 color;
+struct alignas(16) ModelData {
+    glm::mat4 model;
+    glm::vec3 color;
+    VkBool32 selected;
 };
 
 class Renderer
@@ -76,42 +80,44 @@ public:
     Renderer(Window& window, const Camera& camera);
     ~Renderer();
 
-    void drawFrame(const std::vector<glm::vec3>& positions, const std::vector<glm::vec3>& colors);
+    void drawFrame(const std::vector<glm::vec3>& positions,
+                   const std::vector<glm::vec3>& colors,
+                   const std::vector<int>& selectedAtoms);
 
     Window& window;
     const Camera& camera;
-    VkDevice device;
+    vk::Device device;
 
 private:
 
-    VkInstance instance;
+    vk::Instance instance;
     VkDebugUtilsMessengerEXT debugMessenger;
-    VkSurfaceKHR surface;
+    vk::SurfaceKHR surface;
 
-    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+    vk::PhysicalDevice physicalDevice = VK_NULL_HANDLE;
 
-    VkQueue graphicsQueue;
-    VkQueue presentQueue;
+    vk::Queue graphicsQueue;
+    vk::Queue presentQueue;
 
-    VkSwapchainKHR swapChain;
-    std::vector<VkImage> swapChainImages;
-    VkFormat swapChainImageFormat;
-    VkExtent2D swapChainExtent;
+    vk::SwapchainKHR swapChain;
+    std::vector<vk::Image> swapChainImages;
+    vk::Format swapChainImageFormat;
+    vk::Extent2D swapChainExtent;
     std::vector<VkImageView> swapChainImageViews;
     std::vector<VkFramebuffer> swapChainFramebuffers;
     std::vector<VkFramebuffer> imguiSwapChainFramebuffers;
 
-    VkRenderPass renderPass;
-    VkRenderPass imguiRenderPass;
-    VkDescriptorSetLayout uniformDescriptorSetLayout;
-    VkDescriptorSetLayout storageDescriptorSetLayout;
-    VkPipelineLayout pipelineLayout;
-    VkPipeline graphicsPipeline;
+    vk::RenderPass renderPass;
+    vk::RenderPass imguiRenderPass;
+    vk::DescriptorSetLayout uniformDescriptorSetLayout;
+    vk::DescriptorSetLayout storageDescriptorSetLayout;
+    vk::PipelineLayout pipelineLayout;
+    vk::Pipeline graphicsPipeline;
 
-    VkCommandPool commandPool;
+    vk::CommandPool commandPool;
 
-    VkImage depthImage;
-    VkDeviceMemory depthImageMemory;
+    vk::Image depthImage;
+    vk::DeviceMemory depthImageMemory;
     VkImageView depthImageView;
 
     VkBuffer vertexBuffer;
@@ -166,7 +172,7 @@ private:
 
     void createImageViews();
 
-    VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+    vk::ImageView createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags);
 
     void createRenderPass();
     void createImGuiRenderPass();
@@ -187,7 +193,7 @@ private:
 
     void createDepthResources();
 
-    void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+    void createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory);
 
     void createVertexBuffer();
 
@@ -209,28 +215,28 @@ private:
 
     uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
-    VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+    vk::Format findSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features);
 
     void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex, size_t instances);
     void recordImGuiCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 
     void createSyncObjects();
 
-    void updateUniformBuffer(uint32_t currentImage, const std::vector<glm::vec3>& positions, const std::vector<glm::vec3>& colors);
+    void updateUniformBuffer(uint32_t currentImage, const std::vector<glm::vec3>& positions, const std::vector<glm::vec3>& colors, const std::vector<int>& selectedAtoms);
 
-    VkShaderModule createShaderModule(const std::vector<char>& code);
+    vk::ShaderModule createShaderModule(const std::vector<char>& code);
 
-    VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+    vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats);
 
-    VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
+    vk::PresentModeKHR chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes);
 
-    VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+    vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities);
 
-    SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+    SwapChainSupportDetails querySwapChainSupport(vk::PhysicalDevice device);
 
-    bool isDeviceSuitable(VkPhysicalDevice device);
+    bool isDeviceSuitable(vk::PhysicalDevice device);
 
-    QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+    QueueFamilyIndices findQueueFamilies(vk::PhysicalDevice device);
 
     std::vector<const char*> getRequiredExtensions();
 
@@ -240,9 +246,9 @@ private:
 
     static bool hasStencilComponent(VkFormat format);
 
-    static bool checkDeviceExtensionSupport(VkPhysicalDevice device);
+    static bool checkDeviceExtensionSupport(vk::PhysicalDevice device);
 
-    VkFormat findDepthFormat();
+    vk::Format findDepthFormat();
 };
 
 

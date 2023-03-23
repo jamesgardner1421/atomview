@@ -2,7 +2,8 @@
 #include <iostream>
 
 AtomicSystem::AtomicSystem(std::string filename)
-    : filename_(filename), trajectory_(filename_), frame_(trajectory_.read())
+    : filename_(filename), trajectory_(filename_), frame_(trajectory_.read()),
+    m_SelectedAtoms({})
 {
 }
 
@@ -96,5 +97,10 @@ glm::vec3 AtomicSystem::getInitialCameraPosition() const
     return max + 10.0f;
     /* return (max + min) / 2.0f; */
     /* return {10.0f, 0.0f, 10.0f}; */
+}
+
+void AtomicSystem::selectAtoms(const std::vector<int>& selection)
+{
+    m_SelectedAtoms = selection;
 }
 

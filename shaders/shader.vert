@@ -8,6 +8,7 @@ layout(set = 0, binding = 0) uniform UniformBufferObject {
 struct ModelData {
     mat4 model;
     vec3 color;
+    bool selected;
 };
 
 layout(std140, set = 1, binding = 0) readonly buffer StorageBuffer {
@@ -25,6 +26,13 @@ void main() {
     mat4 model = storageBuffer.models[gl_InstanceIndex].model;
     gl_Position = ubo.proj * ubo.view * model * vec4(inPosition, 1.0f);
     outPosition = vec3(model * vec4(inPosition, 1.0f));
-    outColor = storageBuffer.models[gl_InstanceIndex].color;
+    if (storageBuffer.models[gl_InstanceIndex].selected)
+    {
+        outColor = vec3(0.0f, 0.0f, 0.0f);
+    }
+    else
+    {
+        outColor = storageBuffer.models[gl_InstanceIndex].color;
+    }
     outNormal = mat3(transpose(inverse(model))) * inNormal;
 }

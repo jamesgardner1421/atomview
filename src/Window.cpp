@@ -10,19 +10,23 @@ static void framebufferResizeCallback(GLFWwindow* windowHandle, int width, int h
 
 static void mouseButtonCallback(GLFWwindow* windowHandle, int button, int action, int mods)
 {
-    auto app = reinterpret_cast<Application*>(glfwGetWindowUserPointer(windowHandle));
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    ImGuiIO& io = ImGui::GetIO();
+    if (!io.WantCaptureMouse)
     {
-        auto& camera = app->getCamera();
-        camera.toggleMouseControl();
-        camera.setMouseOrigin(app->getWindow().getCursorPosition());
-    }
 
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
-    {
-        app->getCamera().toggleMouseControl();
-    }
+        auto app = reinterpret_cast<Application*>(glfwGetWindowUserPointer(windowHandle));
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+        {
+            auto& camera = app->getCamera();
+            camera.toggleMouseControl();
+            camera.setMouseOrigin(app->getWindow().getCursorPosition());
+        }
 
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+        {
+            app->getCamera().toggleMouseControl();
+        }
+    }
 }
 
 static void scrollCallback(GLFWwindow* windowHandle, double xoffset, double yoffset)

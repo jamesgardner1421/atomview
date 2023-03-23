@@ -34,7 +34,11 @@ void Application::runMainLoop() {
         ImGui::UpdatePlatformWindows();
         ImGui::RenderPlatformWindowsDefault();
 
-        renderer_.drawFrame(atomic_system_->getPositions(), atomic_system_->getColors());
+        renderer_.drawFrame(
+            atomic_system_->getPositions(),
+            atomic_system_->getColors(),
+            atomic_system_->getSelectedAtoms()
+        );
     }
 
 }
